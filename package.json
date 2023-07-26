@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "three": "^0.154.0",
+    "three-mesh-ui": "^6.5.4"
+  },
+  "devDependencies": {
+    "vite": "^4.4.6"
+  }
+}
