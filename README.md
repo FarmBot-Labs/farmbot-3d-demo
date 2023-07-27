@@ -11,4 +11,8 @@ npm install
 npx vite
 ```
 
-Viewable at http://localhost:5173/
+View the farm designer at http://localhost:5173/
+
+For the electronics box demo go to http://localhost:5173/box.html
+
+![Electronics Box Demo](/box.png)
