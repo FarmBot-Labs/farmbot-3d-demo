@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>FarmBot 3D Electronics Box</title>
+		<style>
+			body {
+        margin: 0;
+        display: grid;
+      }
+      #info {
+        color: #f4f4f4;
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        text-align: center;
+        z-index: 100;
+        display: none;
+      }
+      #controls-popup {
+        position: absolute;
+        top: 77px;
+        right: 432px;
+        width: 600px;
+        height: 400px;
+        background: #f4f4f4;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: rgb(0 0 0 / 25%) 0px 0px 10px;
+      }
+		</style>
+	</head>
+	<body>
+    <img src="/nav.png" style="width: 100%;">
+    <div id="controls-popup">
+      <script type="module" src="/box.js"></script>
+    </div>
+	</body>
+</html>
