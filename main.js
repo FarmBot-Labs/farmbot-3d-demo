@@ -20,6 +20,7 @@ camera.lookAt( 0, 0, 0 );
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.shadowMap.enabled = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild( renderer.domElement );
 
 const controls = new OrbitControls( camera, renderer.domElement );
@@ -244,32 +245,38 @@ scene.add(pointLight);
 var ambientLight = new THREE.AmbientLight(0x404040, 1);
 scene.add(ambientLight);
 
-// LED Strip
-function createLEDStrip(start, end, numPoints, color, intensity) {
-  var points = [];
+// LED strip using spotlights
+// function createLEDStrip(start, end, numPoints, color, intensity) {
+//   var points = [];
+//
+//   // Create points along the line
+//   for (var i = 0; i < numPoints; i++) {
+//       var x = start.x + (end.x - start.x) * (i / (numPoints - 1));
+//       var y = start.y + (end.y - start.y) * (i / (numPoints - 1));
+//       var z = start.z + (end.z - start.z) * (i / (numPoints - 1));
+//
+//       // Create a spotlight at each point
+//       var spotLight = new THREE.SpotLight(color, intensity);
+//       spotLight.position.set(x, y, z);
+//
+//       // Point the light downwards
+//       spotLight.target.position.set(x, y, z - 1);
+//       scene.add(spotLight.target);
+//
+//       // Add the light to the scene
+//       scene.add(spotLight);
+//   };
+// }
+//
+// var start = new THREE.Vector3(-1.1775, -0.7, 0.62);
+// var end = new THREE.Vector3(-1.1775, 0.7, 0.62);
+// createLEDStrip(start, end, 5, 0xffffee, 0.25);
 
-  // Create points along the line
-  for (var i = 0; i < numPoints; i++) {
-      var x = start.x + (end.x - start.x) * (i / (numPoints - 1));
-      var y = start.y + (end.y - start.y) * (i / (numPoints - 1));
-      var z = start.z + (end.z - start.z) * (i / (numPoints - 1));
-
-      // Create a spotlight at each point
-      var spotLight = new THREE.SpotLight(color, intensity);
-      spotLight.position.set(x, y, z);
-
-      // Point the light downwards
-      spotLight.target.position.set(x, y, z - 1);
-      scene.add(spotLight.target);
-
-      // Add the light to the scene
-      scene.add(spotLight);
-  };
-}
-
-var start = new THREE.Vector3(-1.1775, -0.7, 0.62);
-var end = new THREE.Vector3(-1.1775, 0.7, 0.62);
-createLEDStrip(start, end, 5, 0xffffee, 0.25);
+// LED strip using rect area light
+const rectLight = new THREE.RectAreaLight( 0xffffee, 100, .02, 1.5 );
+rectLight.position.set( -1.1775, 0, 0.56 );
+rectLight.lookAt( -1.1775, 0, 0 );
+scene.add( rectLight )
 
 // Render loop
 function animate() {
