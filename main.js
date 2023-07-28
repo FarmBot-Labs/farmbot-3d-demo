@@ -18,7 +18,7 @@ camera.position.set( 0, 0, 2.75 );
 camera.lookAt( 0, 0, 0 );
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.shadowMap.enabled = true;
+// renderer.shadowMap.enabled = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild( renderer.domElement );
@@ -34,10 +34,10 @@ ground.receiveShadow = true;
 scene.add(ground);
 
 // Raised bed
-const bedGeometry = new THREE.BoxGeometry( xAxisLength + 0.2, yAxisLength + 0.2, bedHeight );
+const bedGeometry = new THREE.BoxGeometry( xAxisLength + 0.1, yAxisLength + 0.1, bedHeight );
 const bedMaterial = new THREE.MeshStandardMaterial( { color: 0xc39f7a } );
 const bed = new THREE.Mesh( bedGeometry, bedMaterial );
-bed.position.set(0, 0, -0.15);
+bed.position.set(0, 0, -bedHeight / 2);
 bed.castShadow = true;
 bed.receiveShadow = true;
 scene.add( bed );
@@ -46,7 +46,7 @@ scene.add( bed );
 const soilGeometry = new THREE.BoxGeometry( xAxisLength, yAxisLength, bedHeight + 0.01 );
 const soilMaterial = new THREE.MeshStandardMaterial( { color: 0x8e5e31 } );
 const soil = new THREE.Mesh( soilGeometry, soilMaterial );
-soil.position.set(0, 0, -0.15);
+soil.position.set(0, 0, -bedHeight / 2);
 soil.receiveShadow = true;
 soil.castShadow = true;
 scene.add( soil );
@@ -176,7 +176,7 @@ const textContainer = new ThreeMeshUI.Block({
  });
 
 const text = new ThreeMeshUI.Text({
-  content: "FarmBot 3D Demo",
+  content: "FarmBot 3D Demo (click to toggle)",
   fontSize: 0.1
 });
 
@@ -200,37 +200,66 @@ photoContainer.position.set( 0, 0, 0.02 );
 scene.add( photoContainer );
 
 // FarmBot CAD
+let gantryColumnLeft, gantryColumnRight, gantryMainBeam;
+let farmBotLayer = new THREE.Group();
+
 const loader = new GLTFLoader();
+
+loader.load( '/gantry-column-left.gltf', function ( gltf ) {
+  gltf.scene.traverse(function (node) {
+    if (node instanceof THREE.Mesh) {
+      node.castShadow = true;
+    }
+  });
+
+  gantryColumnLeft = gltf.scene;
+  gantryColumnLeft.rotation.z = Math.PI / 2;
+  gantryColumnLeft.position.set( -1.2, -yAxisLength / 2 - 0.05, 0.06 );
+  gantryColumnLeft.castShadow = true;
+  farmBotLayer.add(gantryColumnLeft);
+  scene.add(farmBotLayer);
+});
 
 loader.load( '/gantry-column-right.gltf', function ( gltf ) {
   gltf.scene.traverse(function (node) {
-      if (node instanceof THREE.Mesh) {
-          // Enable casting and receiving shadows on the mesh
-          node.castShadow = true;
-      }
+    if (node instanceof THREE.Mesh) {
+      node.castShadow = true;
+    }
   });
-  const gantryColumnRight = gltf.scene;
+
+  gantryColumnRight = gltf.scene;
   gantryColumnRight.rotation.z = Math.PI / 2;
-  gantryColumnRight.position.set( -1.2, 0.75, 0.06 );
+  gantryColumnRight.position.set( -1.2, yAxisLength / 2 + 0.05, 0.06 );
   gantryColumnRight.castShadow = true;
-    scene.add(gantryColumnRight);
-  }
-);
+  farmBotLayer.add(gantryColumnRight);
+  scene.add(farmBotLayer);
+});
 
 loader.load( '/gantry-main-beam.gltf', function ( gltf ) {
   gltf.scene.traverse(function (node) {
-      if (node instanceof THREE.Mesh) {
-          // Enable casting and receiving shadows on the mesh
-          node.castShadow = true;
-      }
+    if (node instanceof THREE.Mesh) {
+      node.castShadow = true;
+    }
   });
-  const gantryMainBeam = gltf.scene;
+
+  gantryMainBeam = gltf.scene;
   gantryMainBeam.rotation.z = Math.PI / 2;
-  gantryMainBeam.position.set( -1.1775, -0.7, 0.62 );
+  gantryMainBeam.position.set( -1.1775, -0.75, 0.62 );
   gantryMainBeam.castShadow = true;
-    scene.add(gantryMainBeam);
+  farmBotLayer.add(gantryMainBeam);
+  scene.add(farmBotLayer);
+});
+
+function toggleFarmBotLayer() {
+  console.log("toggleFarmBotLayer");
+  if (farmBotLayer.visible) {
+    farmBotLayer.visible = false;
+  } else {
+    farmBotLayer.visible = true;
   }
-);
+}
+
+
 
 // Lighting (to illuminate the CAD model)
 var pointLight = new THREE.PointLight(0xFFFFFF, 1.25);
@@ -278,16 +307,82 @@ rectLight.position.set( -1.1775, 0, 0.56 );
 rectLight.lookAt( -1.1775, 0, 0 );
 scene.add( rectLight )
 
+// Mouse raycasting
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let rect;
+function updateRect() {
+    rect = renderer.domElement.getBoundingClientRect();
+}
+window.addEventListener('resize', updateRect);
+updateRect();
+
+// Button hover effects
+window.addEventListener( 'mousemove', onMouseMove, false );
+
+function onMouseMove( event ) {
+
+  // calculate mouse position in normalized device coordinates
+  // (-1 to +1) for both components
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  // update the picking ray with the camera and mouse position
+  raycaster.setFromCamera( mouse, camera );
+
+  // calculate objects intersecting the picking ray
+  const intersects = raycaster.intersectObjects( [textContainer] );
+
+  if ( intersects.length > 0 ) {
+    // Change the cursor to a pointer
+    renderer.domElement.style.cursor = 'pointer';
+    // change the background color of the text container
+    textContainer.set({ backgroundOpacity: 0.8 });
+  } else {
+    // restore background opacity
+    textContainer.set({ backgroundOpacity: 0.5 });
+    // Change the cursor back to default
+    renderer.domElement.style.cursor = 'default';
+  }
+}
+
+// Button click action
+window.addEventListener( 'click', onClick, false );
+
+function onClick( event ) {
+
+  // calculate mouse position in normalized device coordinates
+  // (-1 to +1) for both components
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  // update the picking ray with the camera and mouse position
+  raycaster.setFromCamera( mouse, camera );
+
+  // calculate objects intersecting the picking ray
+  const intersects = raycaster.intersectObjects( [textContainer] );
+
+  if ( intersects.length > 0 ) {
+    toggleFarmBotLayer()
+  }
+}
+
 // Render loop
 function animate() {
 	requestAnimationFrame( animate );
   ThreeMeshUI.update();
 
   // Pan camera back
-  camera.position.y -= 0.005;
+  // camera.position.y -= 0.005;
+
+  // Move "sun"
   pointLight.position.x += 0.05;
 
   controls.update();
+
+  // update ThreeMeshUI components
+  textContainer.updateMatrixWorld();
+  text.updateMatrixWorld();
 
 	renderer.render( scene, camera );
 }
