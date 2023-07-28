@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { ArcballControls } from 'three/addons/controls/ArcballControls.js';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 import ThreeMeshUI from 'three-mesh-ui';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -13,7 +13,19 @@ const bedHeight = 300;
 // Set up and attach to DOM
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 100, 1000000 );
+// Perspective camera
+// const camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 100, 10000 );
+
+// Orthographic camera
+const camera = new THREE.OrthographicCamera(
+  window.innerWidth / - 2 * 1000,
+  window.innerWidth / 2 * 1000,
+  window.innerHeight / 2 * 1000,
+  window.innerHeight / - 2 * 1000,
+  100, 10000
+);
+
+// Camera position
 camera.position.set( 0, 0, 2750 );
 camera.lookAt( 0, 0, 0 );
 
@@ -23,7 +35,18 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild( renderer.domElement );
 
-const controls = new OrbitControls( camera, renderer.domElement );
+const controls = new ArcballControls( camera, renderer.domElement, scene );
+controls.cursorZoom = true;
+controls.enableAnimations = false;
+controls.maxDistance = 7500; // Perspective camera only
+controls.minDistance = 250; // Perspective camera only
+controls.maxZoom = 7500; // Orthographic camera only
+controls.minZoom = 250; // Orthographic camera only
+controls.setGizmosVisible( false );
+
+controls.addEventListener( 'change', function () {
+	renderer.render( scene, camera );
+} );
 
 // Ground
 const groundGeometry = new THREE.PlaneGeometry(10000, 10000);
@@ -379,7 +402,7 @@ function animate() {
   // camera.position.y -= 5;
 
   // Move "sun"
-  pointLight.position.x += 50;
+  // pointLight.position.x += 50;
 
   controls.update();
 
