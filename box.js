@@ -9,8 +9,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf4f4f4);
 
 const camera = new THREE.PerspectiveCamera( 40, controlsPopup.clientWidth / controlsPopup.clientHeight, 0.1, 1000 );
-camera.position.set( 0, -100, 165 );
-camera.lookAt( 0, -13, 0 );
+camera.position.set( 0, -100, 180 );
+camera.lookAt( 0, 0, 0 );
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize( controlsPopup.clientWidth, controlsPopup.clientHeight )
@@ -20,7 +20,7 @@ controlsPopup.appendChild( renderer.domElement );
 // Electronics box
 const loader = new GLTFLoader();
 
-loader.load( '/electronics-box.gltf', function ( gltf ) {
+loader.load( '/electronics-box-optimized.gltf', function ( gltf ) {
   const electronicsBox = gltf.scene;
   electronicsBox.scale.set( 1000, 1000, 1000 );
   electronicsBox.rotation.z = Math.PI / 2;
@@ -29,7 +29,7 @@ loader.load( '/electronics-box.gltf', function ( gltf ) {
   }
 );
 
-// Button bases (should be integrated into electronics box model for better performance)
+// Button bases
 loader.load( '/push-button.gltf', function ( gltf ) {
   const button1Base = gltf.scene;
   button1Base.scale.set( 1000, 1000, 1000 );
@@ -162,6 +162,64 @@ loader.load( '/push-button.gltf', function ( gltf ) {
   allButtons.add(button2);
   scene.add(allButtons);
 
+// LED bases
+loader.load( '/led-indicator.gltf', function ( gltf ) {
+  const led1Base = gltf.scene;
+  led1Base.scale.set( 1000, 1000, 1000 );
+  led1Base.rotation.z = Math.PI / 2;
+
+  // LED 1 (Sync)
+  led1Base.position.set( 45, 0, -1 );
+  scene.add(led1Base);
+  // Color
+  const led1ColorGeometry = new THREE.CylinderGeometry( 5, 5, 1 );
+  const led1ColorMaterial = new THREE.MeshStandardMaterial( { color: 0x66aa44 } );
+  let led1Color;
+  led1Color = new THREE.Mesh( led1ColorGeometry, led1ColorMaterial );
+  led1Color.position.set(45, 0, 0);
+  led1Color.rotateX( Math.PI / 2 );
+  scene.add(led1Color);
+
+  // LED 2 (Connectivity)
+  const led2Base = led1Base.clone();
+  led2Base.position.set(15, 0, -1);
+  scene.add(led2Base);
+  // Color
+  const led2ColorGeometry = new THREE.CylinderGeometry( 5, 5, 1 );
+  const led2ColorMaterial = new THREE.MeshStandardMaterial( { color: 0x3377dd } );
+  let led2Color;
+  led2Color = new THREE.Mesh( led2ColorGeometry, led2ColorMaterial );
+  led2Color.position.set(15, 0, 0);
+  led2Color.rotateX( Math.PI / 2 );
+  scene.add(led2Color);
+
+  // LED 3
+  const led3Base = led1Base.clone();
+  led3Base.position.set(-15, 0, -1);
+  scene.add(led3Base);
+  // Color
+  const led3ColorGeometry = new THREE.CylinderGeometry( 5, 5, 1 );
+  const led3ColorMaterial = new THREE.MeshStandardMaterial( { color: 0xf4f4f4 } );
+  let led3Color;
+  led3Color = new THREE.Mesh( led3ColorGeometry, led3ColorMaterial );
+  led3Color.position.set(-15, 0, 0);
+  led3Color.rotateX( Math.PI / 2 );
+  scene.add(led3Color);
+
+  // LED 4
+  const led4Base = led1Base.clone();
+  led4Base.position.set(-45, 0, -1);
+  scene.add(led4Base);
+  // Color
+  const led4ColorGeometry = new THREE.CylinderGeometry( 5, 5, 1 );
+  const led4ColorMaterial = new THREE.MeshStandardMaterial( { color: 0xf4f4f4 } );
+  let led4Color;
+  led4Color = new THREE.Mesh( led4ColorGeometry, led4ColorMaterial );
+  led4Color.position.set(-45, 0, 0);
+  led4Color.rotateX( Math.PI / 2 );
+  scene.add(led4Color);
+});
+
 // Lighting
 var pointLight = new THREE.PointLight(0xFFFFFF, 1);
 pointLight.position.set(0, 0, 200);
@@ -171,7 +229,7 @@ var ambientLight = new THREE.AmbientLight(0x404040, 0.5);
 scene.add(ambientLight);
 
 // Fog to limit the view distance
-scene.fog = new THREE.Fog(0xf4f4f4, 225, 425);
+scene.fog = new THREE.Fog(0xf4f4f4, 225, 325);
 
 // Mouse raycasting
 const raycaster = new THREE.Raycaster();
